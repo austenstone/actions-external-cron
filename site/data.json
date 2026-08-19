@@ -1,10 +1,29 @@
 {
-  "generated_at": "2026-08-19T22:03:54.558Z",
+  "generated_at": "2026-08-19T22:08:02.077Z",
   "repo": "austenstone/actions-external-cron",
   "window": {
-    "start": "2026-08-18T23:00:00.000Z",
+    "start": "2026-08-19T22:00:00.000Z",
     "end": "2026-08-19T22:00:00.000Z",
-    "slots": 24
+    "slots": 1
   },
-  "sources": []
+  "sources": [
+    {
+      "source": "github-schedule",
+      "runs": 1,
+      "confident": false,
+      "reliability": 1,
+      "p50_ms": 343000,
+      "p90_ms": 343000,
+      "worst_ms": 343000,
+      "failed": 0,
+      "is_control": true,
+      "samples": [
+        {
+          "slot": "2026-08-19T22:00:00.000Z",
+          "drift_ms": 343000,
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
 }
