@@ -1,0 +1,50 @@
+name: Leaderboard
+
+# Yes, this one uses `schedule:`. It is a daily report — nobody cares if it lands twenty
+# minutes late. Use the right tool for the tolerance you actually have.
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: leaderboard
+  cancel-in-progress: false
+
+jobs:
+  aggregate:
+    name: Rebuild results
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Collect run history
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/$REPO/actions/workflows/scheduled-run.yml/runs?per_page=100" \
+            --paginate \
+            --jq '.workflow_runs[] | {name, event, created_at, run_started_at, conclusion}' \
+            > runs.ndjson
+          echo "Collected $(wc -l < runs.ndjson) runs."
+
+      - name: Rebuild results
+        run: node scripts/leaderboard.mjs runs.ndjson > docs/RESULTS.md
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- docs/RESULTS.md; then
+            echo "No change."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/RESULTS.md
+          git commit -m "chore: update drift leaderboard"
+          git push

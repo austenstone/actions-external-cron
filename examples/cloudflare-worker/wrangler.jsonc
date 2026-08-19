@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "actions-external-cron",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-19",
+  "observability": { "enabled": true },
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "vars": {
+    "GITHUB_REPOSITORY": "austenstone/actions-external-cron",
+    "SOURCE": "cloudflare"
+  }
+}

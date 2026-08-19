@@ -1,0 +1,13 @@
+{
+  "name": "actions-external-cron-vercel",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
+    "vercel": "^58.9.5"
+  }
+}

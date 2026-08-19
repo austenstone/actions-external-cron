@@ -1,0 +1,26 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# Cloudflare / Vercel
+.wrangler/
+.vercel/
+.dev.vars
+
+# Keys — never commit a GitHub App private key
+*.pem
+
+runs.json
+runs.ndjson
+
+# Lockfiles for dev-only CLI tooling — each example is meant to be copied, not installed from here
+package-lock.json

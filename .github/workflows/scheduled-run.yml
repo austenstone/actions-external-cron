@@ -1,0 +1,53 @@
+name: Scheduled Run
+
+# The run name is how the leaderboard identifies which scheduler fired this run,
+# without needing to download an artifact or read the payload back out.
+run-name: ${{ github.event.client_payload.source || 'github-schedule' }}
+
+on:
+  repository_dispatch:
+    types: [scheduled-run]
+
+  # The control group. GitHub's own scheduler, aiming at the exact same slot as
+  # every external trigger. This is the baseline the examples are measured against,
+  # and the backstop if every external scheduler is down at once.
+  schedule:
+    - cron: '0 * * * *'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  measure:
+    name: Measure drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Wall-clock time inside the job is the wrong measurement — it includes runner
+      # queue time. The API tells us when GitHub actually created and started the run.
+      - name: Read run timestamps
+        id: run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          gh api "repos/$REPO/actions/runs/$RUN_ID" \
+            --jq '"created_at=\(.created_at)\nrun_started_at=\(.run_started_at)"' \
+            >> "$GITHUB_OUTPUT"
+
+      - name: Compute drift
+        env:
+          SOURCE: ${{ github.event.client_payload.source || 'github-schedule' }}
+          SCHEDULED_FOR: ${{ github.event.client_payload.scheduled_for }}
+          FIRED_AT: ${{ github.event.client_payload.fired_at }}
+          CREATED_AT: ${{ steps.run.outputs.created_at }}
+          RUN_STARTED_AT: ${{ steps.run.outputs.run_started_at }}
+        run: node scripts/drift.mjs
+
+      - name: The actual work would go here
+        run: echo "Pretend this is your nightly build, sync, or report."
