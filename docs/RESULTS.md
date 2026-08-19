@@ -7,7 +7,7 @@ created the run. Lower is better. See [docs/PAYLOAD.md](PAYLOAD.md) for methodol
 
 | Scheduler | Runs | Slots hit | Median | p90 | Worst | Failed |
 | --- | --- | --- | --- | --- | --- | --- |
-| `manual-smoke-test` | 1 | 100.0% | -18m 8.0s | -18m 8.0s | -18m 8.0s | 0 |
+| `manual-smoke-test` † | 1 | 100.0% | -18m 8.0s | -18m 8.0s | -18m 8.0s | 0 |
 
 ## How to read this
 
@@ -17,6 +17,8 @@ created the run. Lower is better. See [docs/PAYLOAD.md](PAYLOAD.md) for methodol
 - **Median** is the typical experience. **p90** and **Worst** are what wake you up.
 - `github-schedule` is the control: GitHub's own `schedule:` trigger aiming at the same
   slot. Every other row is only interesting relative to it.
+- † Fewer than 12 runs. Ranked below everything else and not
+  worth reading yet — one lucky dispatch is not a track record.
 
-<sub>Generated 2026-08-19T21:42:39.643Z by `scripts/leaderboard.mjs`. Runs drifting more than 30 minutes are excluded — their slot cannot be inferred reliably.</sub>
+<sub>Generated 2026-08-19T21:44:23.824Z by `scripts/leaderboard.mjs`. Runs drifting more than 30 minutes are excluded — their slot cannot be inferred reliably.</sub>
 
