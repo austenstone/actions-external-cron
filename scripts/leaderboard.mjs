@@ -57,6 +57,8 @@ for (const run of runs) {
   bySource.get(run.source).push(run);
 }
 
+const MIN_CONFIDENT_RUNS = 12;
+
 const rows = [...bySource.entries()]
   .map(([source, sourceRuns]) => {
     const drifts = sourceRuns.map((run) => run.drift).sort((a, b) => a - b);
@@ -64,6 +66,7 @@ const rows = [...bySource.entries()]
     return {
       source,
       runs: sourceRuns.length,
+      confident: sourceRuns.length >= MIN_CONFIDENT_RUNS,
       reliability: slotsCovered / expectedSlots,
       p50: percentile(drifts, 0.5),
       p90: percentile(drifts, 0.9),
@@ -71,7 +74,9 @@ const rows = [...bySource.entries()]
       failed: sourceRuns.filter((run) => run.conclusion === 'failure').length,
     };
   })
-  .sort((a, b) => a.p50 - b.p50);
+  .sort((a, b) => Number(b.confident) - Number(a.confident) || a.p50 - b.p50);
+
+const hasLowSample = rows.some((row) => !row.confident);
 
 const iso = (ms) => new Date(ms).toISOString().replace('T', ' ').slice(0, 16);
 
@@ -89,7 +94,8 @@ console.log(
     '| --- | --- | --- | --- | --- | --- | --- |',
     ...rows.map(
       (row) =>
-        `| \`${row.source}\` | ${row.runs} | ${(row.reliability * 100).toFixed(1)}% ` +
+        `| \`${row.source}\`${row.confident ? '' : ' †'} | ${row.runs} ` +
+        `| ${(row.reliability * 100).toFixed(1)}% ` +
         `| ${format(row.p50)} | ${format(row.p90)} | ${format(row.worst)} | ${row.failed} |`,
     ),
     '',
@@ -101,6 +107,12 @@ console.log(
     '- **Median** is the typical experience. **p90** and **Worst** are what wake you up.',
     '- `github-schedule` is the control: GitHub\'s own `schedule:` trigger aiming at the same',
     '  slot. Every other row is only interesting relative to it.',
+    ...(hasLowSample
+      ? [
+          `- † Fewer than ${MIN_CONFIDENT_RUNS} runs. Ranked below everything else and not`,
+          '  worth reading yet — one lucky dispatch is not a track record.',
+        ]
+      : []),
     '',
     `<sub>Generated ${new Date().toISOString()} by \`scripts/leaderboard.mjs\`. ` +
       `Runs drifting more than ${ASSUMPTION_WINDOW_MS / 60_000} minutes are excluded — ` +
