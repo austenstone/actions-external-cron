@@ -113,7 +113,32 @@ if (!labelBlock) {
   }
 }
 
-// 4. Data contract: does the pipeline emit what the dashboard reads? ------------
+// 4. Every class the dashboard renders must actually be styled ------------------
+// This bit the SVG charts: app.js emitted <text class="chart-label"> and friends,
+// but style.css never defined them. SVG text takes `fill`, not `color`, so the
+// unstyled elements fell back to the SVG default of solid black — a 1.11:1
+// contrast ratio on the dark background, i.e. invisible. Nothing errored.
+const css = read('site/style.css');
+const definedClasses = new Set(
+  [...css.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1])
+);
+
+const renderedClasses = new Set();
+for (const [, attr] of app.matchAll(/class="([^"$]*)"/g)) {
+  for (const name of attr.split(/\s+/).filter(Boolean)) renderedClasses.add(name);
+}
+
+for (const name of [...renderedClasses].sort()) {
+  if (!definedClasses.has(name)) {
+    failures.push(
+      `site/app.js renders class "${name}" but site/style.css never defines it — ` +
+        `unstyled SVG text falls back to black and disappears on the dark background.`
+    );
+  }
+}
+notes.push(`Checked ${renderedClasses.size} rendered classes against style.css`);
+
+// 5. Data contract: does the pipeline emit what the dashboard reads? ------------
 // app.js reads fields off each source object; leaderboard.mjs writes them. A
 // rename on either side blanks the dashboard without raising an error.
 const requiredFields = [
