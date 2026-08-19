@@ -1,0 +1,152 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Contract and scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # The seam that has broken twice: a `source` slug an example sends but the
+      # allowlist or label map doesn't know. Neither side throws, so nothing but
+      # an explicit check catches it.
+      - name: Verify source contract
+        run: node scripts/verify-contract.mjs
+
+      - name: Syntax check scripts
+        run: |
+          for script in scripts/*.mjs; do
+            node --check "$script"
+          done
+
+      # Feed the pipeline a known-good fixture and assert it produces a ranked
+      # table. Asserting on real rows (not just non-empty output) is what makes
+      # this catch a regression that silently empties the leaderboard.
+      - name: Smoke test the leaderboard pipeline
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+
+          # Runs arrive as GitHub API objects — the scheduler name rides on
+          # `name` and the drift is `created_at` minus the nearest hour.
+          node -e '
+            const out = [];
+            const now = Math.floor(Date.now() / 3600000) * 3600000;
+            const drift = {
+              "aws-eventbridge": 2000,
+              cloudflare: 1500,
+              "github-schedule": 210000
+            };
+            for (let h = 12; h >= 1; h--) {
+              const slot = now - h * 3600000;
+              for (const [name, ms] of Object.entries(drift)) {
+                out.push(JSON.stringify({
+                  name,
+                  created_at: new Date(slot + ms).toISOString(),
+                  conclusion: "success",
+                  event: "repository_dispatch"
+                }));
+              }
+            }
+            console.log(out.join("\n"));
+          ' > "$work/runs.ndjson"
+
+          node scripts/leaderboard.mjs "$work/runs.ndjson" \
+            --json "$work/data.json" > "$work/RESULTS.md"
+
+          grep -q "| \`cloudflare\` |" "$work/RESULTS.md" \
+            || { echo "::error::pipeline produced no ranked rows"; cat "$work/RESULTS.md"; exit 1; }
+          node -e 'JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"))' "$work/data.json"
+          echo "Pipeline ranked 3 sources from a 12-slot fixture."
+
+  workflows:
+    name: Workflow lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+
+  cloudflare:
+    name: Cloudflare Worker types
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/cloudflare-worker
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # No lockfile is committed — each example is meant to be copied, not
+      # installed from here — so `npm install` is correct over `npm ci`.
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+  deno:
+    name: Deno Deploy types
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/deno-deploy
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type check
+        run: deno check main.ts
+
+  links:
+    name: Relative links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Relative links survive forks and renames, but they also break silently
+      # when a file moves. Resolve every one against the filesystem.
+      - name: Check relative markdown links
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r doc; do
+            while IFS= read -r target; do
+              [ -z "$target" ] && continue
+              resolved="$(dirname "$doc")/${target%%#*}"
+              [ -z "${target%%#*}" ] && continue
+              if [ ! -e "$resolved" ]; then
+                echo "::error file=$doc::broken relative link -> $target"
+                status=1
+              fi
+            done < <(grep -oE '\]\([^)#][^)]*\)' "$doc" \
+                       | sed -E 's/^\]\(//; s/\)$//' \
+                       | grep -vE '^(https?:|mailto:)' || true)
+          done < <(find . -name '*.md' -not -path './**/node_modules/*')
+          exit "$status"

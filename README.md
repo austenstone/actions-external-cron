@@ -106,6 +106,20 @@ it cannot compete in an hourly leaderboard.
 To adapt this for real work, replace the placeholder step in `scheduled-run.yml` with
 whatever your nightly job actually does. The drift measurement is free to leave in.
 
+### Checks
+
+`ci.yml` runs on every push and PR. Beyond the usual type checks and workflow linting,
+two checks exist because of bugs this repo actually shipped:
+
+- **`scripts/verify-contract.mjs`** — the `source` slug an example sends has to be known
+  to both the ranking allowlist in `leaderboard.mjs` and the label map in `site/app.js`.
+  When they drift, nothing throws: the scheduler silently vanishes from the leaderboard,
+  or the dashboard title-cases it into "Gcp Scheduler". Both happened. This catches them.
+- **Pipeline smoke test** — feeds `leaderboard.mjs` a 12-slot fixture and asserts a ranked
+  row comes out. An empty live dataset would otherwise hide a crash in the ranking code.
+
+Run the contract check locally with `node scripts/verify-contract.mjs`.
+
 ## Honest caveats
 
 Worth knowing before you rip out every `schedule:` in your org.
