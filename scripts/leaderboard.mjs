@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 const HOUR_MS = 3_600_000;
 const ASSUMPTION_WINDOW_MS = HOUR_MS / 2;
@@ -16,13 +16,38 @@ const format = (ms) => {
   return `${ms < 0 ? '-' : ''}${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
 };
 
-const [inputPath] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const jsonFlagIndex = args.indexOf('--json');
+const jsonPath = jsonFlagIndex === -1 ? null : args[jsonFlagIndex + 1];
+if (jsonFlagIndex !== -1) {
+  args.splice(jsonFlagIndex, jsonPath ? 2 : 1);
+}
+
+const [inputPath] = args;
 if (!inputPath) {
-  console.error('Usage: node scripts/leaderboard.mjs <runs.ndjson>');
+  console.error('Usage: node scripts/leaderboard.mjs <runs.ndjson> [--json <path>]');
   process.exit(1);
 }
 
-const runs = readFileSync(inputPath, 'utf8')
+if (jsonFlagIndex !== -1 && !jsonPath) {
+  console.error('Missing path for --json');
+  process.exit(1);
+}
+
+// Only real schedulers rank. Manual smoke tests and ad-hoc dispatches are useful for
+// checking the plumbing but they fire whenever a human felt like it, so letting them
+// onto the leaderboard produces nonsense like "-18m drift".
+const RANKED_SOURCES = new Set([
+  'aws-eventbridge',
+  'azure-logic-app',
+  'cloudflare',
+  'deno-deploy',
+  'gcp-cloud-scheduler',
+  'github-schedule',
+  'vercel-cron',
+]);
+
+const allRuns = readFileSync(inputPath, 'utf8')
   .split('\n')
   .filter((line) => line.trim())
   .map((line) => JSON.parse(line))
@@ -41,8 +66,77 @@ const runs = readFileSync(inputPath, 'utf8')
   // Runs beyond the assumption window cannot be attributed to a slot with confidence.
   .filter((run) => Math.abs(run.drift) <= ASSUMPTION_WINDOW_MS);
 
+const runs = allRuns.filter((run) => RANKED_SOURCES.has(run.source));
+const ignoredCount = allRuns.length - runs.length;
+
+const MIN_CONFIDENT_RUNS = 12;
+
+const defaultWindow = () => {
+  const end = Math.floor(Date.now() / HOUR_MS) * HOUR_MS;
+  return {
+    start: end - 23 * HOUR_MS,
+    end,
+    slots: 24,
+  };
+};
+
+const writeJson = (rows, windowStart, windowEnd, expectedSlots) => {
+  if (!jsonPath) return;
+
+  const samplesBySource = new Map();
+  for (const run of runs) {
+    if (!samplesBySource.has(run.source)) samplesBySource.set(run.source, []);
+    samplesBySource.get(run.source).push(run);
+  }
+
+  const payload = {
+    generated_at: new Date().toISOString(),
+    repo: process.env.GITHUB_REPOSITORY || 'austenstone/actions-external-cron',
+    window: {
+      start: new Date(windowStart).toISOString(),
+      end: new Date(windowEnd).toISOString(),
+      slots: expectedSlots,
+    },
+    sources: rows.map((row) => ({
+      source: row.source,
+      runs: row.runs,
+      confident: row.confident,
+      reliability: row.reliability,
+      p50_ms: row.p50,
+      p90_ms: row.p90,
+      worst_ms: row.worst,
+      failed: row.failed,
+      is_control: row.source === 'github-schedule',
+      samples: [...(samplesBySource.get(row.source) ?? [])]
+        .sort((a, b) => a.slot - b.slot)
+        .map((sample) => ({
+          slot: new Date(sample.slot).toISOString(),
+          drift_ms: sample.drift,
+          conclusion: sample.conclusion ?? '',
+        })),
+    })),
+  };
+
+  writeFileSync(jsonPath, `${JSON.stringify(payload, null, 2)}\n`);
+};
+
 if (runs.length === 0) {
-  console.log('# Results\n\nNo runs recorded yet. Give it a few hours.\n');
+  const { start, end, slots } = defaultWindow();
+  writeJson([], start, end, slots);
+  console.log(
+    [
+      '# Results',
+      '',
+      'No scheduler runs recorded yet.',
+      '',
+      ignoredCount > 0
+        ? `${ignoredCount} run(s) were ignored because they came from a source that is not ` +
+          'a tracked scheduler — manual smoke tests fire whenever a human triggers them, ' +
+          'so ranking them would be meaningless.'
+        : 'Deploy an example from `examples/` and the first row will appear within the hour.',
+      '',
+    ].join('\n'),
+  );
   process.exit(0);
 }
 
@@ -56,8 +150,6 @@ for (const run of runs) {
   if (!bySource.has(run.source)) bySource.set(run.source, []);
   bySource.get(run.source).push(run);
 }
-
-const MIN_CONFIDENT_RUNS = 12;
 
 const rows = [...bySource.entries()]
   .map(([source, sourceRuns]) => {
@@ -79,6 +171,8 @@ const rows = [...bySource.entries()]
 const hasLowSample = rows.some((row) => !row.confident);
 
 const iso = (ms) => new Date(ms).toISOString().replace('T', ' ').slice(0, 16);
+
+writeJson(rows, windowStart, windowEnd, expectedSlots);
 
 console.log(
   [

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Actions external cron punctuality dashboard</title>
+    <meta
+      name="description"
+      content="A GitHub Pages dashboard comparing GitHub Actions native schedule drift against external schedulers."
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
+
+    <header class="page-shell hero-shell">
+      <nav class="topbar" aria-label="Dashboard links">
+        <a class="brand" href="https://github.com/austenstone/actions-external-cron">
+          <span class="brand-mark" aria-hidden="true">⏱</span>
+          <span>Actions external cron</span>
+        </a>
+        <div class="topbar-links">
+          <a href="../docs/PAYLOAD.md">Methodology</a>
+          <a href="https://github.com/austenstone/actions-external-cron">Repository</a>
+        </div>
+      </nav>
+
+      <div class="intro-grid">
+        <div>
+          <p class="eyebrow">Scheduler punctuality lab</p>
+          <h1>Who actually starts GitHub Actions on time?</h1>
+          <p class="lede">
+            This dashboard compares external schedulers against GitHub's native
+            <code>schedule:</code> trigger by measuring total drift from the intended hourly slot
+            to the moment GitHub creates the workflow run.
+          </p>
+        </div>
+
+        <section class="verdict-card" aria-labelledby="verdict-title">
+          <p class="eyebrow">Current verdict</p>
+          <h2 id="verdict-title">Loading data…</h2>
+          <p id="verdict-copy">Fetching the latest scheduler measurements.</p>
+        </section>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <aside id="data-note" class="data-note" hidden></aside>
+
+      <section class="metric-grid" aria-label="Dashboard summary">
+        <article class="metric-card">
+          <span class="metric-label">Window</span>
+          <strong id="metric-window">—</strong>
+          <span id="metric-slots">—</span>
+        </article>
+        <article class="metric-card emphasis">
+          <span class="metric-label">Best reliable external</span>
+          <strong id="metric-best">—</strong>
+          <span id="metric-best-detail">—</span>
+        </article>
+        <article class="metric-card control-card">
+          <span class="metric-label">GitHub native cron</span>
+          <strong id="metric-control">—</strong>
+          <span id="metric-control-detail">Control group</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Samples</span>
+          <strong id="metric-samples">—</strong>
+          <span id="metric-confidence">—</span>
+        </article>
+      </section>
+
+      <section id="empty-state" class="empty-state" hidden>
+        <div class="empty-art" aria-hidden="true">⌛</div>
+        <div>
+          <p class="eyebrow">No reports yet</p>
+          <h2>Waiting for the first scheduler dispatch.</h2>
+          <p>
+            The receiver is ready, but no source has reported a completed run in this window.
+            Once Cloudflare Workers, AWS EventBridge, GCP Cloud Scheduler, Azure Logic Apps,
+            Deno Deploy, Vercel Cron, or GitHub's native schedule produce data, this page will
+            rank them automatically.
+          </p>
+          <div class="button-row">
+            <a class="button" href="../examples/">View scheduler examples</a>
+            <a class="button secondary" href="https://github.com/austenstone/actions-external-cron">Open the repo</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="median-chart-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Latency</p>
+            <h2 id="median-chart-heading">Median drift by scheduler</h2>
+          </div>
+          <p>
+            Signed logarithmic scale: second-level schedulers stay visible next to the
+            minute-level GitHub control.
+          </p>
+        </div>
+        <div id="median-chart" class="chart-frame" aria-live="polite" tabindex="0"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="strip-chart-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Hourly behavior</p>
+            <h2 id="strip-chart-heading">Drift over time</h2>
+          </div>
+          <p>Each dot is one intended hourly slot. Red marks a failed workflow conclusion.</p>
+        </div>
+        <div id="strip-chart" class="chart-frame" aria-live="polite" tabindex="0"></div>
+      </section>
+
+      <section id="leaderboard" class="panel" aria-labelledby="leaderboard-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Ranked results</p>
+            <h2 id="leaderboard-heading">Leaderboard</h2>
+          </div>
+          <p>
+            Reliability is shown before latency because silently missing slots is worse than
+            being a few seconds late.
+          </p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Scheduler drift leaderboard. The table is the text equivalent for the charts.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Scheduler</th>
+                <th scope="col">Runs</th>
+                <th scope="col">Slots hit</th>
+                <th scope="col">Median</th>
+                <th scope="col">p90</th>
+                <th scope="col">Worst</th>
+                <th scope="col">Failed</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr>
+                <td colspan="7">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-shell footer">
+      <span id="generated-at">Generated: —</span>
+      <span aria-hidden="true">•</span>
+      <a id="repo-link" href="https://github.com/austenstone/actions-external-cron">austenstone/actions-external-cron</a>
+      <span aria-hidden="true">•</span>
+      <a href="../docs/PAYLOAD.md">Methodology</a>
+    </footer>
+  </body>
+</html>

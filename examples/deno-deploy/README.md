@@ -1,6 +1,6 @@
 # Deno Deploy — `Deno.cron()`
 
-**Auth:** GitHub App (via Octokit)
+**Auth:** PAT or GitHub App (via Octokit)
 **Reports:** `scheduled_for` (inferred) + `fired_at`
 **Cost:** included in the Deno Deploy free tier
 
@@ -9,9 +9,14 @@ no YAML, no dashboard. Declare the schedule in the same file that does the work.
 
 ## Setup
 
-### 1. Create the App
+### 1. Pick an auth method
 
-Same as the [Cloudflare example](../cloudflare-worker/README.md#1-create-the-app):
+**PAT (fastest).** Create a
+[fine-grained PAT](https://github.com/settings/personal-access-tokens/new) on the target
+repo with **Contents: Read and write**. That is the only credential you need.
+
+**GitHub App.** Same as the
+[Cloudflare example](../cloudflare-worker/README.md#1-create-the-app):
 **Contents: Read and write**, installed on the target repo.
 
 **No key conversion needed.** Octokit accepts GitHub's PKCS#1 key directly. Paste it
@@ -30,21 +35,34 @@ Set these in the Deno Deploy dashboard under **Settings → Environment Variable
 
 | Variable | Value |
 | --- | --- |
+| `GITHUB_REPOSITORY` | `owner/repo` (always required) |
+| `GITHUB_TOKEN` | PAT with Contents: write — **set this and skip the three below** |
 | `GITHUB_APP_ID` | e.g. `1234567` |
 | `GITHUB_INSTALLATION_ID` | e.g. `12345678` |
 | `GITHUB_APP_PRIVATE_KEY` | the full PEM, newlines and all |
-| `GITHUB_REPOSITORY` | `owner/repo` |
+| `TRIGGER_SECRET` | optional — required to enable `POST /dispatch` |
+
+`GITHUB_TOKEN` wins if both are set.
 
 > Paste the private key through the dashboard, not the CLI. Multi-line secrets get
 > mangled by shell quoting in ways that are tedious to debug.
+
+> Or let CI do it: add `DENO_DEPLOY_TOKEN` and `DISPATCH_TOKEN` secrets plus a
+> `DENO_PROJECT` variable, and
+> [`deploy-deno.yml`](../../.github/workflows/deploy-deno.yml) ships this on every push.
+> Environment variables still have to be set once in the dashboard — `deployctl` only
+> uploads code.
 
 ### 3. Verify
 
 ```bash
 # Local: --unstable-cron is required outside Deno Deploy
 deno task dev
-curl -X POST http://localhost:8000/dispatch
+curl -X POST -H "Authorization: Bearer $TRIGGER_SECRET" http://localhost:8000/dispatch
 ```
+
+`POST /dispatch` returns `403` until `TRIGGER_SECRET` is set — a deployed URL is public,
+and an unauthenticated trigger is an open button on your pipeline.
 
 Deployed crons appear under the project's **Cron** tab with their execution history.
 

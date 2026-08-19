@@ -1,0 +1,93 @@
+name: Deploy Deno Deploy
+
+# Deploys the Deno scheduler as soon as the required secrets exist, so getting a real
+# data point into the leaderboard is "add two secrets" rather than "read a README".
+on:
+  push:
+    branches: [main]
+    paths:
+      - examples/deno-deploy/**
+      - .github/workflows/deploy-deno.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-deno
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Deno project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Secrets are not available to job-level `if`, so gate on a step output instead.
+      - name: Check for credentials
+        id: creds
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+          DENO_PROJECT: ${{ vars.DENO_PROJECT }}
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+        run: |
+          missing=()
+          [ -n "$DENO_DEPLOY_TOKEN" ] || missing+=("DENO_DEPLOY_TOKEN (secret)")
+          [ -n "$DENO_PROJECT" ]      || missing+=("DENO_PROJECT (variable)")
+          [ -n "$DISPATCH_TOKEN" ]    || missing+=("DISPATCH_TOKEN (secret)")
+
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "All credentials present — deploying." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Deno deploy skipped"
+              echo
+              echo "Missing: \`${missing[*]}\`"
+              echo
+              echo "- \`DENO_DEPLOY_TOKEN\` — dash.deno.com → Account Settings → Access Tokens"
+              echo "- \`DENO_PROJECT\` — repository *variable* holding the Deno Deploy project name"
+              echo "- \`DISPATCH_TOKEN\` — fine-grained PAT on this repo with **Contents: write**"
+              echo
+              echo "\`Deno.cron\` only runs on deployed projects, so this must ship to Deno Deploy to compete."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: denoland/setup-deno@v2
+        if: steps.creds.outputs.ready == 'true'
+        with:
+          deno-version: v2.x
+
+      - name: Typecheck
+        if: steps.creds.outputs.ready == 'true'
+        working-directory: examples/deno-deploy
+        run: deno check main.ts
+
+      - name: Deploy
+        if: steps.creds.outputs.ready == 'true'
+        working-directory: examples/deno-deploy
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+        run: |
+          deno run -A jsr:@deno/deployctl deploy \
+            --project="${{ vars.DENO_PROJECT }}" \
+            --prod \
+            main.ts
+
+      - name: Remind about environment variables
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          {
+            echo "### Deno project deployed"
+            echo
+            echo "deployctl ships code, not environment variables. Set these once in the"
+            echo "Deno Deploy dashboard (Settings → Environment Variables) or the cron will throw:"
+            echo
+            echo '```'
+            echo "GITHUB_TOKEN=<fine-grained PAT, Contents: write>"
+            echo "GITHUB_REPOSITORY=${{ github.repository }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

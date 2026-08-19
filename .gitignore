@@ -24,3 +24,4 @@ runs.ndjson
 
 # Lockfiles for dev-only CLI tooling — each example is meant to be copied, not installed from here
 package-lock.json
+deno.lock

@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: actions/setup-node@v7
+
       - name: Collect run history
         env:
           GH_TOKEN: ${{ github.token }}
@@ -34,17 +36,19 @@ jobs:
           echo "Collected $(wc -l < runs.ndjson) runs."
 
       - name: Rebuild results
-        run: node scripts/leaderboard.mjs runs.ndjson > docs/RESULTS.md
+        run: |
+          mkdir -p site
+          node scripts/leaderboard.mjs runs.ndjson --json site/data.json > docs/RESULTS.md
 
       - name: Commit if changed
         run: |
-          if git diff --quiet -- docs/RESULTS.md; then
+          if [ -z "$(git status --porcelain -- docs/RESULTS.md site/data.json)" ]; then
             echo "No change."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/RESULTS.md
+          git add docs/RESULTS.md site/data.json
           git commit -m "chore: update drift leaderboard"
           git push

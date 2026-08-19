@@ -1,0 +1,89 @@
+name: Deploy Cloudflare Worker
+
+# Deploys the Cloudflare scheduler as soon as the required secrets exist, so getting a
+# real data point into the leaderboard is "add two secrets" rather than "read a README".
+on:
+  push:
+    branches: [main]
+    paths:
+      - examples/cloudflare-worker/**
+      - .github/workflows/deploy-cloudflare.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/cloudflare-worker
+    steps:
+      - uses: actions/checkout@v5
+
+      # Secrets are not available to job-level `if`, so gate on a step output instead.
+      - name: Check for credentials
+        id: creds
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+        run: |
+          missing=()
+          [ -n "$CLOUDFLARE_API_TOKEN" ]  || missing+=("CLOUDFLARE_API_TOKEN")
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || missing+=("CLOUDFLARE_ACCOUNT_ID")
+          [ -n "$DISPATCH_TOKEN" ]        || missing+=("DISPATCH_TOKEN")
+
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "All credentials present — deploying." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Cloudflare deploy skipped"
+              echo
+              echo "Missing repository secrets: \`${missing[*]}\`"
+              echo
+              echo "- \`CLOUDFLARE_API_TOKEN\` — Cloudflare dashboard, *Edit Cloudflare Workers* template"
+              echo "- \`CLOUDFLARE_ACCOUNT_ID\` — right-hand sidebar of the Workers overview page"
+              echo "- \`DISPATCH_TOKEN\` — fine-grained PAT on this repo with **Contents: write**"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/setup-node@v7
+        if: steps.creds.outputs.ready == 'true'
+        with:
+          node-version: 24
+
+      - name: Install
+        if: steps.creds.outputs.ready == 'true'
+        run: npm install --no-audit --no-fund
+
+      - name: Deploy
+        if: steps.creds.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: examples/cloudflare-worker
+          # Pushed as encrypted Worker secrets, not plaintext vars.
+          secrets: |
+            GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+
+      - name: Note next fire
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          {
+            echo "### Cloudflare worker deployed"
+            echo
+            echo "Cron trigger \`0 * * * *\` is live. Next dispatch fires at the top of the hour"
+            echo "and will appear as \`cloudflare\` on the leaderboard."
+          } >> "$GITHUB_STEP_SUMMARY"

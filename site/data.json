@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-08-19T22:03:54.558Z",
+  "repo": "austenstone/actions-external-cron",
+  "window": {
+    "start": "2026-08-18T23:00:00.000Z",
+    "end": "2026-08-19T22:00:00.000Z",
+    "slots": 24
+  },
+  "sources": []
+}

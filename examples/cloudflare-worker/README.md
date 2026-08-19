@@ -20,7 +20,31 @@ If you only ever build one of these examples, build this one.
 
 ## Setup
 
-### 1. Create the App
+Two ways to authenticate. Pick one.
+
+- **PAT** — one secret, 30 seconds, no key conversion. Start here.
+- **GitHub App** — short-lived tokens, better hygiene, more setup. Steps 1–2 below.
+
+### Option A: PAT (fastest)
+
+Create a [fine-grained PAT](https://github.com/settings/personal-access-tokens/new) scoped
+to the target repo with **Repository permissions → Contents: Read and write**, then:
+
+```bash
+npm install
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler deploy
+```
+
+That is the whole setup. Skip to [Verify](#4-verify).
+
+> Or let CI do it: add `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and `DISPATCH_TOKEN`
+> as repository secrets and [`deploy-cloudflare.yml`](../../.github/workflows/deploy-cloudflare.yml)
+> deploys this worker on every push.
+
+### Option B: GitHub App
+
+#### 1. Create the App
 
 [Create a GitHub App](https://github.com/settings/apps/new) with **Repository permissions →
 Contents: Read and write** (that is what `POST /dispatches` requires — see
@@ -30,7 +54,7 @@ Install it on the target repo, then grab the installation ID from the URL of
 `https://github.com/settings/installations` → **Configure**:
 `.../installations/12345678` → `12345678`.
 
-### 2. Convert the private key
+#### 2. Convert the private key
 
 **This is the step everyone gets wrong.** GitHub hands you a PKCS#1 key
 (`-----BEGIN RSA PRIVATE KEY-----`). WebCrypto only imports PKCS#8. Convert it:
@@ -61,6 +85,20 @@ npx wrangler deploy
 
 Set `GITHUB_REPOSITORY` and `SOURCE` in [`wrangler.jsonc`](./wrangler.jsonc) — they are
 config, not secrets.
+
+`GITHUB_TOKEN` wins if both are set, so you can migrate either direction without
+redeploying.
+
+### Optional: guard the manual endpoint
+
+`POST /dispatch` is a convenience trigger. It stays **disabled** until you set a shared
+secret, because a deployed Worker URL is public:
+
+```bash
+npx wrangler secret put TRIGGER_SECRET
+```
+
+Then call it with `Authorization: Bearer <secret>`.
 
 ### 4. Verify
 

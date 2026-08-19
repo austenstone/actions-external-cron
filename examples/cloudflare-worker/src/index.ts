@@ -1,9 +1,18 @@
 interface Env {
-  GITHUB_APP_ID: string;
-  GITHUB_APP_PRIVATE_KEY: string;
-  GITHUB_INSTALLATION_ID: string;
+  // Simplest path: a fine-grained PAT with Contents: write. Set this and the
+  // GitHub App variables below become unnecessary.
+  GITHUB_TOKEN?: string;
+
+  // App path: short-lived tokens, no long-lived secret. More setup, better hygiene.
+  GITHUB_APP_ID?: string;
+  GITHUB_APP_PRIVATE_KEY?: string;
+  GITHUB_INSTALLATION_ID?: string;
+
   GITHUB_REPOSITORY: string;
   SOURCE: string;
+
+  // Optional shared secret guarding the manual /dispatch endpoint.
+  TRIGGER_SECRET?: string;
 }
 
 const API = 'https://api.github.com';
@@ -50,7 +59,7 @@ const createAppJwt = async (env: Env) => {
 
   const signature = await crypto.subtle.sign(
     'RSASSA-PKCS1-v1_5',
-    await importPrivateKey(env.GITHUB_APP_PRIVATE_KEY),
+    await importPrivateKey(env.GITHUB_APP_PRIVATE_KEY as string),
     new TextEncoder().encode(signingInput),
   );
 
@@ -70,10 +79,25 @@ const createInstallationToken = async (env: Env) => {
   return ((await response.json()) as { token: string }).token;
 };
 
+// A PAT wins if present. Otherwise fall back to minting a short-lived installation
+// token from the GitHub App credentials.
+const resolveToken = (env: Env) => {
+  if (env.GITHUB_TOKEN) return Promise.resolve(env.GITHUB_TOKEN);
+
+  if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY || !env.GITHUB_INSTALLATION_ID) {
+    throw new Error(
+      'No credentials. Set GITHUB_TOKEN, or all of GITHUB_APP_ID, ' +
+        'GITHUB_APP_PRIVATE_KEY and GITHUB_INSTALLATION_ID.',
+    );
+  }
+
+  return createInstallationToken(env);
+};
+
 const dispatch = async (env: Env, scheduledFor: Date) => {
   const response = await fetch(`${API}/repos/${env.GITHUB_REPOSITORY}/dispatches`, {
     method: 'POST',
-    headers: headers(await createInstallationToken(env)),
+    headers: headers(await resolveToken(env)),
     body: JSON.stringify({
       event_type: 'scheduled-run',
       client_payload: {
@@ -110,9 +134,25 @@ export default {
   },
 
   // Convenience endpoint so you can trigger a dispatch by hand while setting this up.
+  // Guarded by a shared secret — without one this is a public button that fires your
+  // pipeline, and the URL will not stay private forever.
   async fetch(request, env: Env) {
     if (new URL(request.url).pathname !== '/dispatch') {
       return new Response('POST /dispatch to fire manually.\n', { status: 404 });
+    }
+
+    if (request.method !== 'POST') {
+      return new Response('Use POST.\n', { status: 405 });
+    }
+
+    if (!env.TRIGGER_SECRET) {
+      return new Response('TRIGGER_SECRET is not set, so manual dispatch is disabled.\n', {
+        status: 403,
+      });
+    }
+
+    if (request.headers.get('authorization') !== `Bearer ${env.TRIGGER_SECRET}`) {
+      return new Response('Unauthorized.\n', { status: 401 });
     }
 
     try {

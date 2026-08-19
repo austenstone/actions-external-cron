@@ -11,6 +11,8 @@ are picked up promptly.
 
 So: fire the schedule from somewhere else, and dispatch on demand.
 
+**📊 [Live punctuality dashboard →](https://austenstone.github.io/actions-external-cron/)**
+
 ```mermaid
 flowchart LR
     subgraph ext ["External schedulers (pick one)"]
@@ -25,7 +27,7 @@ flowchart LR
     CF & DD & AW & GC & AZ & VC -->|"POST /dispatches"| API[(GitHub API)]
     API --> WF["scheduled-run.yml"]
     NATIVE["GitHub schedule: cron"] -.->|control group| WF
-    WF --> RES["docs/RESULTS.md"]
+    WF --> RES["docs/RESULTS.md<br/>+ live dashboard"]
 ```
 
 ## The whole idea
@@ -60,13 +62,18 @@ infrastructure to provision.
 
 ## Results
 
-Live drift measurements are in **[docs/RESULTS.md](docs/RESULTS.md)**, rebuilt daily by
+**[Live dashboard →](https://austenstone.github.io/actions-external-cron/)** — ranked
+leaderboard, median drift chart, and per-slot history, rebuilt automatically. The same
+numbers land in **[docs/RESULTS.md](docs/RESULTS.md)** via
 [`leaderboard.yml`](.github/workflows/leaderboard.yml). Methodology is in
 [docs/PAYLOAD.md](docs/PAYLOAD.md).
 
 All six schedulers target the same cron slot, and GitHub's native `schedule:` runs
 alongside as the control group. If an external scheduler is not meaningfully better than
 the control, that shows up in the table rather than in someone's anecdote.
+
+Only the seven known scheduler sources are ranked. Ad-hoc dispatches and smoke tests are
+ignored, because a run fired whenever a human felt like it has no meaningful drift.
 
 ## Running it yourself
 
@@ -76,7 +83,25 @@ the control, that shows up in the table rather than in someone's anecdote.
 2. Pick an example and follow its README. Each is standalone.
 3. Set `source` to something unique per scheduler — that string is what the leaderboard
    groups by.
-4. Wait a day, then read [docs/RESULTS.md](docs/RESULTS.md).
+4. Wait a day, then check the [dashboard](https://austenstone.github.io/actions-external-cron/).
+
+### Fastest path: deploy from Actions
+
+Cloudflare and Deno are the two schedulers that are free *and* capable of hourly firing,
+so both have a one-secret deploy workflow. Add the secrets and the scheduler ships itself:
+
+| Scheduler | Add | Workflow |
+| --- | --- | --- |
+| Cloudflare | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DISPATCH_TOKEN` | [`deploy-cloudflare.yml`](.github/workflows/deploy-cloudflare.yml) |
+| Deno Deploy | `DENO_DEPLOY_TOKEN`, `DISPATCH_TOKEN` + `DENO_PROJECT` variable | [`deploy-deno.yml`](.github/workflows/deploy-deno.yml) |
+
+`DISPATCH_TOKEN` is a fine-grained PAT on this repo with **Contents: write** — that is the
+permission `POST /repos/{owner}/{repo}/dispatches` actually checks. Both workflows skip
+cleanly with an explanatory job summary when the secrets are absent, so a fork never sees
+a red X it did not ask for.
+
+Vercel deliberately has no deploy workflow: Hobby-tier cron is capped at once per day, so
+it cannot compete in an hourly leaderboard.
 
 To adapt this for real work, replace the placeholder step in `scheduled-run.yml` with
 whatever your nightly job actually does. The drift measurement is free to leave in.
