@@ -49,8 +49,8 @@ platform, or measurement.
 
 | Scheduler | Auth | Reports timing | Retries | Cost |
 | --- | --- | --- | --- | --- |
-| [Cloudflare Workers](examples/cloudflare-worker/) | GitHub App | slot + fired | hand-rolled | free plan |
-| [Deno Deploy](examples/deno-deploy/) | GitHub App | fired | built-in | free tier |
+| [Cloudflare Workers](examples/cloudflare-worker/) | PAT *or* GitHub App | slot + fired | hand-rolled | free plan |
+| [Deno Deploy](examples/deno-deploy/) | PAT *or* GitHub App | fired | built-in | free tier |
 | [AWS EventBridge Scheduler](examples/aws-eventbridge/) | PAT (Secrets Manager) | slot | built-in | 14M/mo free |
 | [GCP Cloud Scheduler](examples/gcp-cloud-scheduler/) | PAT (plaintext) | none | built-in | 3 jobs free |
 | [Azure Logic Apps](examples/azure-logic-app/) | PAT (secure param) | fired | built-in | ~$0.01/mo |
@@ -74,6 +74,20 @@ the control, that shows up in the table rather than in someone's anecdote.
 
 Only the seven known scheduler sources are ranked. Ad-hoc dispatches and smoke tests are
 ignored, because a run fired whenever a human felt like it has no meaningful drift.
+
+### Current status
+
+The control group is live and collecting. The external schedulers are not deployed in this
+repo yet — each one needs an account credential, and none is checked in. So the dashboard
+currently shows GitHub's native cron alone, which is why it reports "not enough confident
+data" rather than a winner.
+
+The first native `schedule:` sample landed **5m 43s** after its slot. One data point proves
+nothing, and the leaderboard says so until a source has 12+ runs. But it is a promising
+start for the premise.
+
+Deploying one external scheduler is enough to make it a real comparison — see
+[Fastest path](#fastest-path-deploy-from-actions) below.
 
 ## Running it yourself
 
