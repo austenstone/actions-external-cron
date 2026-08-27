@@ -1,13 +1,13 @@
 # Results
 
-Observation window: **2026-08-19 22:00 → 2026-08-26 06:00 UTC** (153 hourly slots, 153 runs).
+Observation window: **2026-08-19 22:00 → 2026-08-27 06:00 UTC** (177 hourly slots, 172 runs).
 
 Ranked by median total drift — the gap between the cron slot and the moment GitHub
 created the run. Lower is better. See [docs/PAYLOAD.md](PAYLOAD.md) for methodology.
 
 | Scheduler | Runs | Slots hit | Median | p90 | Worst | Failed |
 | --- | --- | --- | --- | --- | --- | --- |
-| `github-schedule` | 153 | 95.4% | 8m 57.0s | 19m 11.0s | 29m 59.0s | 0 |
+| `github-schedule` | 172 | 92.7% | 8m 57.0s | 19m 22.0s | 29m 59.0s | 0 |
 
 ## How to read this
 
@@ -18,5 +18,5 @@ created the run. Lower is better. See [docs/PAYLOAD.md](PAYLOAD.md) for methodol
 - `github-schedule` is the control: GitHub's own `schedule:` trigger aiming at the same
   slot. Every other row is only interesting relative to it.
 
-<sub>Generated 2026-08-26T06:28:22.107Z by `scripts/leaderboard.mjs`. Runs drifting more than 30 minutes are excluded — their slot cannot be inferred reliably.</sub>
+<sub>Generated 2026-08-27T09:23:52.527Z by `scripts/leaderboard.mjs`. Runs drifting more than 30 minutes are excluded — their slot cannot be inferred reliably.</sub>
 
