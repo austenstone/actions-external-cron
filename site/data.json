@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-09-03T06:41:32.975Z",
+  "generated_at": "2026-09-04T06:40:21.670Z",
   "repo": "austenstone/actions-external-cron",
   "window": {
     "start": "2026-08-19T22:00:00.000Z",
-    "end": "2026-09-03T06:00:00.000Z",
-    "slots": 345
+    "end": "2026-09-04T06:00:00.000Z",
+    "slots": 369
   },
   "sources": [
     {
       "source": "github-schedule",
-      "runs": 310,
+      "runs": 334,
       "confident": true,
-      "reliability": 0.8695652173913043,
-      "p50_ms": 530000,
-      "p90_ms": 1151000,
+      "reliability": 0.8780487804878049,
+      "p50_ms": 532000,
+      "p90_ms": 1134000,
       "worst_ms": 1799000,
       "failed": 0,
       "is_control": true,
@@ -1566,6 +1566,126 @@
         {
           "slot": "2026-09-03T06:00:00.000Z",
           "drift_ms": -1268000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T07:00:00.000Z",
+          "drift_ms": 576000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T08:00:00.000Z",
+          "drift_ms": 720000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T09:00:00.000Z",
+          "drift_ms": 594000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T10:00:00.000Z",
+          "drift_ms": 525000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T11:00:00.000Z",
+          "drift_ms": 429000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T12:00:00.000Z",
+          "drift_ms": 818000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T13:00:00.000Z",
+          "drift_ms": 518000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T14:00:00.000Z",
+          "drift_ms": 551000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T15:00:00.000Z",
+          "drift_ms": 532000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T16:00:00.000Z",
+          "drift_ms": 585000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T17:00:00.000Z",
+          "drift_ms": 459000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T18:00:00.000Z",
+          "drift_ms": 630000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T19:00:00.000Z",
+          "drift_ms": 376000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T20:00:00.000Z",
+          "drift_ms": 456000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T21:00:00.000Z",
+          "drift_ms": 458000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T22:00:00.000Z",
+          "drift_ms": 469000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-03T23:00:00.000Z",
+          "drift_ms": 405000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T00:00:00.000Z",
+          "drift_ms": 1272000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T01:00:00.000Z",
+          "drift_ms": 964000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T02:00:00.000Z",
+          "drift_ms": 725000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T03:00:00.000Z",
+          "drift_ms": 596000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T04:00:00.000Z",
+          "drift_ms": 589000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T05:00:00.000Z",
+          "drift_ms": 492000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-04T06:00:00.000Z",
+          "drift_ms": 850000,
           "conclusion": "success"
         }
       ]
