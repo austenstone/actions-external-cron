@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-09-09T06:41:11.943Z",
+  "generated_at": "2026-09-10T06:40:43.237Z",
   "repo": "austenstone/actions-external-cron",
   "window": {
     "start": "2026-08-19T22:00:00.000Z",
-    "end": "2026-09-09T06:00:00.000Z",
-    "slots": 489
+    "end": "2026-09-10T06:00:00.000Z",
+    "slots": 513
   },
   "sources": [
     {
       "source": "github-schedule",
-      "runs": 454,
+      "runs": 478,
       "confident": true,
-      "reliability": 0.9079754601226994,
+      "reliability": 0.9122807017543859,
       "p50_ms": 527000,
-      "p90_ms": 1115000,
+      "p90_ms": 1107000,
       "worst_ms": 1799000,
       "failed": 0,
       "is_control": true,
@@ -2286,6 +2286,126 @@
         {
           "slot": "2026-09-09T06:00:00.000Z",
           "drift_ms": 857000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T07:00:00.000Z",
+          "drift_ms": 556000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T08:00:00.000Z",
+          "drift_ms": 707000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T09:00:00.000Z",
+          "drift_ms": 557000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T10:00:00.000Z",
+          "drift_ms": 512000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T11:00:00.000Z",
+          "drift_ms": 441000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T12:00:00.000Z",
+          "drift_ms": 762000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T13:00:00.000Z",
+          "drift_ms": 488000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T14:00:00.000Z",
+          "drift_ms": 490000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T15:00:00.000Z",
+          "drift_ms": 466000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T16:00:00.000Z",
+          "drift_ms": 545000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T17:00:00.000Z",
+          "drift_ms": 410000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T18:00:00.000Z",
+          "drift_ms": 635000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T19:00:00.000Z",
+          "drift_ms": 383000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T20:00:00.000Z",
+          "drift_ms": 488000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T21:00:00.000Z",
+          "drift_ms": 408000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T22:00:00.000Z",
+          "drift_ms": 410000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-09T23:00:00.000Z",
+          "drift_ms": 425000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T00:00:00.000Z",
+          "drift_ms": 1271000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T01:00:00.000Z",
+          "drift_ms": 1074000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T02:00:00.000Z",
+          "drift_ms": 710000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T03:00:00.000Z",
+          "drift_ms": 594000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T04:00:00.000Z",
+          "drift_ms": 588000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T05:00:00.000Z",
+          "drift_ms": 496000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-09-10T06:00:00.000Z",
+          "drift_ms": 890000,
           "conclusion": "success"
         }
       ]
