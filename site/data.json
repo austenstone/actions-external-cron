@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-10-01T06:46:32.670Z",
+  "generated_at": "2026-10-02T06:45:14.183Z",
   "repo": "austenstone/actions-external-cron",
   "window": {
     "start": "2026-08-19T22:00:00.000Z",
-    "end": "2026-10-01T06:00:00.000Z",
-    "slots": 1017
+    "end": "2026-10-02T06:00:00.000Z",
+    "slots": 1041
   },
   "sources": [
     {
       "source": "github-schedule",
-      "runs": 982,
+      "runs": 1006,
       "confident": true,
-      "reliability": 0.9547689282202556,
-      "p50_ms": 533000,
+      "reliability": 0.9558117195004803,
+      "p50_ms": 536000,
       "p90_ms": 1084000,
       "worst_ms": 1799000,
       "failed": 0,
@@ -4926,6 +4926,126 @@
         {
           "slot": "2026-10-01T06:00:00.000Z",
           "drift_ms": 943000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T07:00:00.000Z",
+          "drift_ms": 1009000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T08:00:00.000Z",
+          "drift_ms": 738000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T09:00:00.000Z",
+          "drift_ms": 666000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T10:00:00.000Z",
+          "drift_ms": 551000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T11:00:00.000Z",
+          "drift_ms": 477000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T12:00:00.000Z",
+          "drift_ms": 837000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T13:00:00.000Z",
+          "drift_ms": 691000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T14:00:00.000Z",
+          "drift_ms": 583000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T15:00:00.000Z",
+          "drift_ms": 545000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T16:00:00.000Z",
+          "drift_ms": 548000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T17:00:00.000Z",
+          "drift_ms": 488000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T18:00:00.000Z",
+          "drift_ms": 717000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T19:00:00.000Z",
+          "drift_ms": 438000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T20:00:00.000Z",
+          "drift_ms": 586000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T21:00:00.000Z",
+          "drift_ms": 469000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T22:00:00.000Z",
+          "drift_ms": 479000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-01T23:00:00.000Z",
+          "drift_ms": 435000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T00:00:00.000Z",
+          "drift_ms": 1481000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T01:00:00.000Z",
+          "drift_ms": 1541000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T02:00:00.000Z",
+          "drift_ms": 1001000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T03:00:00.000Z",
+          "drift_ms": 645000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T04:00:00.000Z",
+          "drift_ms": 607000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T05:00:00.000Z",
+          "drift_ms": 528000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-02T06:00:00.000Z",
+          "drift_ms": 890000,
           "conclusion": "success"
         }
       ]
