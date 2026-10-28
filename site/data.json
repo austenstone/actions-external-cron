@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-10-27T06:44:23.255Z",
+  "generated_at": "2026-10-28T06:32:34.058Z",
   "repo": "austenstone/actions-external-cron",
   "window": {
     "start": "2026-08-19T22:00:00.000Z",
-    "end": "2026-10-27T06:00:00.000Z",
-    "slots": 1641
+    "end": "2026-10-28T06:00:00.000Z",
+    "slots": 1665
   },
   "sources": [
     {
       "source": "github-schedule",
-      "runs": 1590,
+      "runs": 1614,
       "confident": true,
-      "reliability": 0.9573430834856794,
+      "reliability": 0.9579579579579579,
       "p50_ms": 540000,
-      "p90_ms": 1115000,
+      "p90_ms": 1108000,
       "worst_ms": 1799000,
       "failed": 0,
       "is_control": true,
@@ -7966,6 +7966,126 @@
         {
           "slot": "2026-10-27T06:00:00.000Z",
           "drift_ms": 875000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T07:00:00.000Z",
+          "drift_ms": 965000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T08:00:00.000Z",
+          "drift_ms": 700000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T09:00:00.000Z",
+          "drift_ms": 592000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T10:00:00.000Z",
+          "drift_ms": 520000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T11:00:00.000Z",
+          "drift_ms": 489000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T12:00:00.000Z",
+          "drift_ms": 772000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T13:00:00.000Z",
+          "drift_ms": 758000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T14:00:00.000Z",
+          "drift_ms": 597000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T15:00:00.000Z",
+          "drift_ms": 573000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T16:00:00.000Z",
+          "drift_ms": 453000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T17:00:00.000Z",
+          "drift_ms": 359000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T18:00:00.000Z",
+          "drift_ms": 453000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T19:00:00.000Z",
+          "drift_ms": 320000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T20:00:00.000Z",
+          "drift_ms": 403000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T21:00:00.000Z",
+          "drift_ms": 307000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T22:00:00.000Z",
+          "drift_ms": 352000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-27T23:00:00.000Z",
+          "drift_ms": 307000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T00:00:00.000Z",
+          "drift_ms": 986000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T01:00:00.000Z",
+          "drift_ms": 405000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T02:00:00.000Z",
+          "drift_ms": 512000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T03:00:00.000Z",
+          "drift_ms": 439000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T04:00:00.000Z",
+          "drift_ms": 440000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T05:00:00.000Z",
+          "drift_ms": 382000,
+          "conclusion": "success"
+        },
+        {
+          "slot": "2026-10-28T06:00:00.000Z",
+          "drift_ms": 651000,
           "conclusion": "success"
         }
       ]
